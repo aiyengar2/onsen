@@ -3,7 +3,7 @@ onsen
 
 ## Onsen
 
-A k8s controller for creating and maintaining warm pools of provisioned clusters based on CAPI.
+A k8s controller for creating and maintaining warm pools of provisioned clusters.
 
 ## Building
 
@@ -14,7 +14,7 @@ A k8s controller for creating and maintaining warm pools of provisioned clusters
 `./bin/onsen`
 
 ## License
-Copyright (c) 2019 [Rancher Labs, Inc.](http://rancher.com)
+Copyright (c) 2021 [Rancher Labs, Inc.](http://rancher.com)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

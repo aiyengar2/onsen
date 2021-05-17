@@ -8,8 +8,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/aiyengar2/onsen/pkg/foo"
-	"github.com/aiyengar2/onsen/pkg/generated/controllers/some.api.group"
+	"os"
+
+	"github.com/aiyengar2/onsen/pkg/controllers/action"
+	"github.com/aiyengar2/onsen/pkg/controllers/claim"
+	"github.com/aiyengar2/onsen/pkg/controllers/pool"
+	"github.com/aiyengar2/onsen/pkg/controllers/provisioner"
+	"github.com/aiyengar2/onsen/pkg/controllers/warmcluster"
+	"github.com/aiyengar2/onsen/pkg/generated/controllers/onsen.cattle.io"
 	"github.com/rancher/wrangler/pkg/kubeconfig"
 	"github.com/rancher/wrangler/pkg/signals"
 	"github.com/rancher/wrangler/pkg/start"
@@ -18,20 +24,20 @@ import (
 )
 
 var (
-	Version = "v0.0.0-dev"
-	GitCommit = "HEAD"
+	Version    = "v0.0.0-dev"
+	GitCommit  = "HEAD"
 	KubeConfig string
 )
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "testy"
+	app.Name = "onsen"
 	app.Version = fmt.Sprintf("%s (%s)", Version, GitCommit)
-	app.Usage = "testy needs help!"
+	app.Usage = "A k8s controller for creating and maintaining warm pools of provisioned clusters"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:   "kubeconfig",
-			EnvVar: "KUBECONFIG",
+			Name:        "kubeconfig",
+			EnvVar:      "KUBECONFIG",
 			Destination: &KubeConfig,
 		},
 	}
@@ -53,14 +59,37 @@ func run(c *cli.Context) {
 		logrus.Fatalf("failed to find kubeconfig: %v", err)
 	}
 
-	foos, err := some.NewFactoryFromConfig(kubeConfig)
-	if err != nil {
-		logrus.Fatalf("Error building sample controllers: %s", err.Error())
-	}
+	types := onsen.NewFactoryFromConfigOrDie(kubeConfig)
 
-	foo.Register(ctx, foos.Some().V1().Foo())
+	provisioner.Register(ctx,
+		types.Onsen().V1().ClusterTemplate(),
+		types.Onsen().V1().Cluster(),
+	)
 
-	if err := start.All(ctx, 2, foos); err != nil {
+	action.Register(ctx,
+		types.Onsen().V1().Cluster(),
+		types.Onsen().V1().ClusterAction(),
+	)
+
+	warmcluster.Register(ctx,
+		types.Onsen().V1().Cluster(),
+		types.Onsen().V1().ClusterAction(),
+		types.Onsen().V1().ClusterBootstrapConfig(),
+		types.Onsen().V1().ClusterHealthCheckTemplate(),
+		types.Onsen().V1().WarmCluster(),
+	)
+
+	pool.Register(ctx,
+		types.Onsen().V1().WarmCluster(),
+		types.Onsen().V1().WarmPool(),
+	)
+
+	claim.Register(ctx,
+		types.Onsen().V1().WarmPool(),
+		types.Onsen().V1().WarmClusterClaim(),
+	)
+
+	if err := start.All(ctx, 5, types); err != nil {
 		logrus.Fatalf("Error starting: %s", err.Error())
 	}
 
