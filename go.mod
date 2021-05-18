@@ -35,11 +35,12 @@ require (
 	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/rancher/lasso v0.0.0-20210512210011-31c3967449d3
-	github.com/rancher/wrangler v0.8.0
+	github.com/rancher/wrangler v0.8.1-0.20210506052526-673b7f8692d9
 	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli v1.22.5
 	golang.org/x/tools v0.1.1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
+	k8s.io/apiextensions-apiserver v0.21.0
 	k8s.io/apimachinery v0.21.0
 	k8s.io/client-go v1.5.2
 )
